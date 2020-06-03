@@ -155,7 +155,11 @@ class FSMMeta(object):
             transition = self.transitions.get('+', None)
         return transition
 
-    def add_transition(self, method, source, target, on_error=None, conditions=[], permission=None, custom={}):
+    def add_transition(self, method, source, target, on_error=None, conditions=None, permission=None, custom=None):
+        if conditions is None:
+            conditions = []
+        if custom is None:
+            custom = {}
         if source in self.transitions:
             raise AssertionError('Duplicate transition for {0} state'.format(source))
 
@@ -493,13 +497,17 @@ class ConcurrentTransitionMixin(object):
         self._update_initial_state()
 
 
-def transition(field, source='*', target=None, on_error=None, conditions=[], permission=None, custom={}):
+def transition(field, source='*', target=None, on_error=None, conditions=None, permission=None, custom=None):
     """
     Method decorator to mark allowed transitions.
 
     Set target to None if current state needs to be validated and
     has not changed after the function call.
     """
+    if conditions is None:
+        conditions = []
+    if custom is None:
+        custom = {}
     def inner_transition(func):
         wrapper_installed, fsm_meta = True, getattr(func, '_django_fsm', None)
         if not fsm_meta:
